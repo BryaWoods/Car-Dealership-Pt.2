@@ -41,8 +41,8 @@ public class SalesContract extends Contract {
         this.processingFee = processingFee;
     }
 
-    public boolean isFinance() {
-        return finance;
+    public String isFinance() {
+        return finance ? "YES" : "NO";
     }
 
     public void setFinance(boolean finance) {
