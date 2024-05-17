@@ -1,5 +1,3 @@
-package CarDealership.src.main.java.com.pluralsight;
-
 import java.util.ArrayList;
 import java.util.List;
 
