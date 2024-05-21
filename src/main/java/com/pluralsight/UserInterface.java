@@ -21,6 +21,7 @@ public class UserInterface {
         init();
         boolean quit = false;
         while (!quit) {
+            System.out.println(" ");
             System.out.println("✧✦✧ 𝓜𝓔𝓝𝓤 ✧✦✧");
             System.out.println("1. Get vehicles by price");
             System.out.println("2. Get vehicles by make and model");
@@ -83,6 +84,8 @@ public class UserInterface {
     }
 
     public void processGetByMakeModelRequest() {
+
+
         System.out.print("Enter make: ");
         String make = scanner.nextLine();
         System.out.print("Enter model: ");
@@ -92,10 +95,10 @@ public class UserInterface {
     }
 
     public void processGetByYearRequest() {
-        System.out.print("Enter minimum year: ");
-        int min = scanner.nextInt();
-        System.out.print("Enter maximum year: ");
-        int max = scanner.nextInt();
+        int min = getIntInput("Enter minimum year: ");
+
+        int max = getIntInput("Enter maximum year: ");
+        scanner.nextLine();
         List<Vehicle> vehicles = dealership.getVehiclesByYear(min, max);
         displayVehicles(vehicles);
     }
@@ -108,10 +111,12 @@ public class UserInterface {
     }
 
     public void processGetByMileageRequest() {
-        System.out.print("Enter minimum mileage: ");
-        int min = scanner.nextInt();
-        System.out.print("Enter maximum mileage: ");
-        int max = scanner.nextInt();
+
+        int min = getIntInput("Enter minimum mileage: ");
+
+        int max = getIntInput("Enter maximum mileage: ");
+        scanner.nextLine();
+
         List<Vehicle> vehicles = dealership.getVehiclesByMileage(min, max);
         displayVehicles(vehicles);
     }
@@ -129,8 +134,8 @@ public class UserInterface {
     }
 
     public void processAddVehicleRequest() {
-        System.out.print("Enter vehicle vin: ");
-        int vin = scanner.nextInt();
+
+        int vin = getIntInput("Enter vehicle vin");
         scanner.nextLine();
 
         System.out.print("Enter vehicle make: ");
@@ -139,8 +144,8 @@ public class UserInterface {
         System.out.print("Enter vehicle model: ");
         String model = scanner.nextLine();
 
-        System.out.print("Enter vehicle year: ");
-        int year = scanner.nextInt();
+        int year = getIntInput("Enter vehicle year: ");
+
         scanner.nextLine();
 
         System.out.print("Enter vehicle price: ");
@@ -150,8 +155,7 @@ public class UserInterface {
         System.out.print("Enter vehicle color: ");
         String color = scanner.nextLine();
 
-        System.out.print("Enter vehicle mileage: ");
-        int mileage = scanner.nextInt();
+        int mileage = getIntInput("Enter vehicle mileage: ");
         scanner.nextLine();
 
         System.out.print("Enter vehicle type (Car, Truck, SUV, Motorcycle): ");
@@ -166,8 +170,9 @@ public class UserInterface {
     }
 
     public void processRemoveVehicleRequest() {
-        System.out.print("Enter the VIN of the vehicle you wish to remove: ");
-        int vin = scanner.nextInt();
+
+        int vin = getIntInput("Enter the VIN of the vehicle you wish to remove: ");
+        scanner.nextLine();
 
         boolean vehicleRemoved = false;
         for (Vehicle vehicle : dealership.getAllVehicles()) {
@@ -265,7 +270,7 @@ public class UserInterface {
                 case "S":
                     processSellVehicle();
                     break;
-                case "R":
+                case "L":
                     processLeaseVehicle();
                     break;
                 case "X":
@@ -279,6 +284,11 @@ public class UserInterface {
     }
 
     public void processSellVehicle(){
+
+        ContractFileManager contractFileManager = new ContractFileManager();
+        DealershipFileManager dealershipFileManager = new DealershipFileManager();
+
+
         System.out.print("Enter vehicle VIN: ");
         int vin = scanner.nextInt();
         scanner.nextLine();
@@ -290,6 +300,8 @@ public class UserInterface {
             return;
         }
 
+        String date = LocalDate.now().toString();
+
         System.out.print("Enter customer name: ");
         String customerName = scanner.nextLine();
 
@@ -300,6 +312,10 @@ public class UserInterface {
         String financeOption = scanner.nextLine();
         boolean isFinance = financeOption.equalsIgnoreCase("yes");
 
+        SalesContract salesContract = new SalesContract(date,customerName,customerEmail,vehicleBeingSold,isFinance);
+
+
+
         salesContract.setDate(LocalDate.now().toString());
         salesContract.setCustomerName(customerName);
         salesContract.setCustomerEmail(customerEmail);
@@ -307,6 +323,8 @@ public class UserInterface {
         salesContract.setFinance(isFinance);
 
         dealership.removeVehicle(vehicleBeingSold);
+        dealershipFileManager.saveDealership(dealership);
+
         contractFileManager.saveContract(salesContract);
         System.out.println("Vehicle sold and contract saved successfully!");
 
@@ -317,8 +335,11 @@ public class UserInterface {
 
     public void processLeaseVehicle() {
 
-        System.out.print("Enter vehicle VIN: ");
-        int vin = scanner.nextInt();
+        ContractFileManager contractFileManager = new ContractFileManager();
+        DealershipFileManager dealershipFileManager = new DealershipFileManager();
+
+
+        int vin = getIntInput("Enter vehicle VIN: ");
         scanner.nextLine();
 
         Vehicle vehicleBeingLeased = dealership.findVehicleByVin(vin);
@@ -328,11 +349,16 @@ public class UserInterface {
             return;
 
         }
+
+        String date = LocalDate.now().toString();
+
         System.out.print("Enter customer name: ");
         String customerName = scanner.nextLine();
 
         System.out.print("Enter customer email: ");
         String customerEmail = scanner.nextLine();
+
+        LeaseContract leaseContract = new LeaseContract(date,customerName,customerEmail,vehicleBeingLeased);
 
         leaseContract.setDate(LocalDate.now().toString());
         leaseContract.setCustomerName(customerName);
@@ -341,9 +367,32 @@ public class UserInterface {
 
         dealership.removeVehicle(vehicleBeingLeased);
 
+        dealershipFileManager.saveDealership(dealership);
+
+
         contractFileManager.saveContract(leaseContract);
 
         System.out.println("Vehicle leased and contract saved successfully!");
+    }
+
+    public int getIntInput(String prompt) {
+        int input = 0;
+        boolean isValid = false;
+
+        while (!isValid) {
+            System.out.print(prompt);
+
+            if (scanner.hasNextInt()) {
+                input = scanner.nextInt();
+                isValid = true;
+            } else {
+
+                System.out.println("Invalid input. Please enter a valid number.");
+                scanner.next();
+            }
+        }
+
+        return input;
     }
 
 }

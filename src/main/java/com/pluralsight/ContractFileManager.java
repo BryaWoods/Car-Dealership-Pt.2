@@ -7,6 +7,7 @@ import java.io.IOException;
 public class ContractFileManager {
     private static final String fileName = "contacts.csv";
 
+
     public void saveContract(Contract contract){
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             String contactData = formatContractData(contract);
@@ -42,7 +43,7 @@ public class ContractFileManager {
 
     private String formatLeaseContract(LeaseContract leaseContract){
 
-        return "SALE |" + leaseContract.getDate() + "|" + leaseContract.getCustomerName() + "|" +
+        return "LEASE |" + leaseContract.getDate() + "|" + leaseContract.getCustomerName() + "|" +
                 leaseContract.getCustomerEmail() + "|" + leaseContract.getVehicleSold().getVin() + "|" +
                 leaseContract.getVehicleSold().getMake() + "|" +
                 leaseContract.getVehicleSold().getModel() + "|" + leaseContract.getVehicleSold().getVehicleType() + "|" +
